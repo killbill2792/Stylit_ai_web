@@ -1,362 +1,321 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Stylit — Pod Vote</title>
-    <link rel="stylesheet" href="/styles.css" />
-    <style>
-      /* Fallback styling if styles.css is minimal */
-      :root { color-scheme: dark; }
-      body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background:#0B0B0F; color:#fff; }
-      a { color: inherit; }
-      .wrap { max-width: 520px; margin: 0 auto; padding: 18px; }
-      .card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.10); border-radius: 18px; overflow:hidden; }
-      .topbar { display:flex; align-items:center; justify-content:space-between; gap: 10px; margin-bottom: 12px; }
-      .badge { font-size: 12px; padding: 6px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); }
-      .imgbox { width: 100%; aspect-ratio: 9/16; background: rgba(255,255,255,.04); position: relative; }
-      .imgbox img { width: 100%; height: 100%; object-fit: cover; display:block; }
-      .imgdots { position:absolute; left:0; right:0; bottom: 10px; display:flex; justify-content:center; gap: 8px; }
-      .dot { width: 7px; height: 7px; border-radius: 999px; background: rgba(255,255,255,.25); }
-      .dot.active { background: rgba(255,255,255,.9); }
-      .content { padding: 14px; }
-      .title { font-size: 18px; font-weight: 800; letter-spacing:-.2px; margin: 0 0 8px; }
-      .sub { color: rgba(255,255,255,.75); font-size: 13px; line-height: 1.35; margin: 0 0 12px; }
-      .field { display:flex; flex-direction:column; gap:6px; margin-top: 10px; }
-      label { font-size: 12px; color: rgba(255,255,255,.7); }
-      input, textarea {
-        border-radius: 14px; border:1px solid rgba(255,255,255,.12);
-        background: rgba(255,255,255,.06); color: #fff; padding: 12px;
-        outline: none;
-      }
-      textarea { resize: vertical; min-height: 92px; }
-      .row { display:flex; gap: 10px; }
-      .row > * { flex: 1; }
-      .votes { display:flex; gap: 12px; justify-content:space-between; margin-top: 14px; }
-      .voteBtn {
-        flex: 1;
-        border-radius: 16px;
-        border: 1px solid rgba(255,255,255,.12);
-        background: rgba(255,255,255,.06);
-        padding: 12px 10px;
-        cursor: pointer;
-        display:flex; align-items:center; justify-content:center; gap:10px;
-        transition: transform .08s ease, background .15s ease, border-color .15s ease;
-        user-select:none;
-      }
-      .voteBtn:hover { transform: translateY(-1px); border-color: rgba(255,255,255,.22); }
-      .emoji { font-size: 24px; }
-      .btn {
-        display:inline-flex; align-items:center; justify-content:center;
-        gap: 10px; padding: 12px 14px; border-radius: 14px;
-        border: 1px solid rgba(255,255,255,.12);
-        background: rgba(255,255,255,.06); cursor:pointer; text-decoration:none;
-      }
-      .btnPrimary { background: #fff; color:#000; border-color:#fff; font-weight:800; }
-      .note { margin-top: 10px; font-size: 12px; color: rgba(255,255,255,.65); }
-      .err { margin-top: 10px; font-size: 12px; color: #ff6b6b; white-space: pre-wrap; }
-      .ok { margin-top: 10px; font-size: 13px; color: #6ee7b7; }
-      .hidden { display:none; }
-      .footer { margin-top: 14px; display:flex; justify-content:space-between; gap: 10px; align-items:center; flex-wrap:wrap; }
-      .muted { color: rgba(255,255,255,.55); font-size: 12px; }
-    </style>
-  </head>
-  <body>
-    <div class="wrap">
-      <div class="topbar">
-        <div class="badge" id="audBadge">Pod</div>
-        <div class="badge" id="liveBadge">Loading…</div>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Stylit Pod</title>
+  <style>
+    :root{
+      --bg:#0b0b0f; --card:#121218; --muted:#9aa0a6; --text:#fff;
+      --border: rgba(255,255,255,.12);
+      --btn:#1f1f28;
+      --btn2:#ffffff;
+      --btn2Text:#000;
+      --danger:#ff4d4d;
+      --ok:#22c55e;
+    }
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text);}
+    .wrap{max-width:560px;margin:0 auto;padding:18px 14px 40px;}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35);}
+    .img{width:100%;aspect-ratio:1/1;background:#1b1b24;display:flex;align-items:center;justify-content:center;}
+    .img img{width:100%;height:100%;object-fit:cover;display:none;}
+    .pad{padding:14px;}
+    h1{font-size:20px;margin:0 0 6px;}
+    .meta{color:var(--muted);font-size:13px;line-height:1.35}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
+    .btn{
+      flex:1; min-width:120px;
+      background:var(--btn); color:#fff;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px 10px;
+      font-weight:700;
+      cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:10px;
+    }
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .btnPrimary{background:var(--btn2);color:var(--btn2Text);border-color:rgba(255,255,255,.2)}
+    .field{margin-top:12px;}
+    label{display:block;font-size:13px;color:var(--muted);margin:0 0 6px;}
+    input,textarea{
+      width:100%;
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px 12px;
+      font-size:15px;
+      outline:none;
+      box-sizing:border-box;
+    }
+    textarea{min-height:90px;resize:vertical}
+    .status{margin-top:12px;color:var(--muted);font-size:13px}
+    .err{color:var(--danger);margin-top:10px;font-size:13px;white-space:pre-wrap}
+    .ok{color:var(--ok)}
+    .footer{margin-top:14px;padding:14px;border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,.04)}
+    .small{color:var(--muted);font-size:12px;line-height:1.4}
+    a{color:#fff}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="img" id="imgBox">
+        <img id="podImg" alt="Pod image" />
+        <div id="imgPlaceholder" style="color:rgba(255,255,255,.55);font-weight:700;">Loading image…</div>
       </div>
 
-      <div class="card">
-        <div class="imgbox" id="imgBox">
-          <!-- image injected -->
-          <div class="imgdots hidden" id="dots"></div>
+      <div class="pad">
+        <h1 id="title">Loading pod…</h1>
+        <div class="meta" id="meta">Fetching details.</div>
+
+        <div class="field" id="nameField">
+          <label for="guestName">Your name <span style="opacity:.6">(required for friends pods)</span></label>
+          <input id="guestName" placeholder="e.g., Alex" />
         </div>
 
-        <div class="content">
-          <h1 class="title" id="title">Loading pod…</h1>
-          <p class="sub" id="subtitle">Fetching details.</p>
+        <div class="field" id="commentField" style="display:none;">
+          <label for="guestComment">Comment <span style="opacity:.6">(friends pods)</span></label>
+          <textarea id="guestComment" placeholder="Tell your friend what you think…"></textarea>
+        </div>
 
-          <div class="field" id="nameField">
-            <label for="guestName">Your name <span id="nameReq">(required)</span></label>
-            <input id="guestName" type="text" placeholder="e.g., Alex" autocomplete="name" />
+        <div class="row">
+          <button class="btn" id="btnYes">🔥 Fire</button>
+          <button class="btn" id="btnMaybe">🤔 Maybe</button>
+          <button class="btn" id="btnNo">❌ No</button>
+        </div>
+
+        <div class="status" id="status"></div>
+        <div class="err" id="err"></div>
+
+        <div class="footer">
+          <div class="row" style="margin-top:0;">
+            <a class="btn btnPrimary" id="downloadBtn" href="download.html">Download Stylit</a>
           </div>
-
-          <div class="field hidden" id="commentField">
-            <label for="guestComment">Comment (only the pod owner will see this)</label>
-            <textarea id="guestComment" placeholder="Quick thoughts…"></textarea>
-          </div>
-
-          <div class="votes" id="votes">
-            <div class="voteBtn" data-choice="yes" title="Yes">
-              <span class="emoji">🔥</span>
-              <span>Fire</span>
-            </div>
-            <div class="voteBtn" data-choice="maybe" title="Maybe">
-              <span class="emoji">🤔</span>
-              <span>Maybe</span>
-            </div>
-            <div class="voteBtn" data-choice="no" title="No">
-              <span class="emoji">❌</span>
-              <span>No</span>
-            </div>
-          </div>
-
-          <div class="ok hidden" id="okMsg">✅ Vote submitted. Thanks!</div>
-          <div class="err hidden" id="errMsg"></div>
-
-          <div class="footer">
-            <a class="btn btnPrimary" id="downloadBtn" href="/download.html">Download Stylit</a>
-            <span class="muted" id="fineprint">Powered by Stylit Pods</span>
-          </div>
-
-          <div class="note" id="note">
-            Tip: This is a quick vote page. If you install Stylit, you’ll see recaps + results.
+          <div class="small" style="margin-top:10px;">
+            Tip: You can vote here quickly. Installing the app unlocks more features.
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <script>
-      // IMPORTANT: replace with your Vercel domain that hosts /api/pod-public and /api/pod-guest-vote
-      const API_BASE = "https://mvp-styli.vercel.app/";
+<script>
+  // ✅ IMPORTANT: This must point to your Vercel API project
+  const API_BASE = "https://mvp-styli.vercel.app";
 
-      // -------- helpers ----------
-      function $(id) { return document.getElementById(id); }
+  // ---- Helpers
+  function qs(name){ return new URLSearchParams(location.search).get(name); }
 
-      function getGuestId() {
-        const key = "stylit_guest_id";
-        let id = localStorage.getItem(key);
-        if (!id) {
-          id = "guest_" + Math.random().toString(36).slice(2) + "_" + Date.now();
-          localStorage.setItem(key, id);
-        }
-        return id;
-      }
+  // Support both styles:
+  // 1) /pod.html?podId=...
+  // 2) /pod/<id>?from=...&aud=...
+  function getPodIdFromUrl() {
+    const direct = qs("podId");
+    if (direct) return direct;
 
-      function parseUrl() {
-        const u = new URL(window.location.href);
+    const m = location.pathname.match(/\/pod\/([0-9a-fA-F-]{36})/);
+    return m ? m[1] : null;
+  }
 
-        // Supports both:
-        // 1) /pod/<podId>?from=...&aud=...
-        // 2) /pod.html?podId=<podId>&from=...&aud=...
-        let podId = u.searchParams.get("podId");
-        if (!podId) {
-          const parts = u.pathname.split("/").filter(Boolean);
-          // e.g. ["pod","<id>"]
-          const podIdx = parts.indexOf("pod");
-          if (podIdx !== -1 && parts[podIdx + 1]) podId = parts[podIdx + 1];
-        }
+  function normalizeAud(aud) {
+    if (!aud) return "";
+    const v = aud.toLowerCase();
+    if (v === "friends") return "friends";
+    if (v === "twins" || v === "style_twins") return "twins";
+    if (v === "global" || v === "global_mix") return "global";
+    return v;
+  }
 
-        const from = u.searchParams.get("from") || "";
-        const aud = (u.searchParams.get("aud") || "").toLowerCase();
+  function getOrCreateGuestId() {
+    const key = "stylit_guest_id";
+    let id = localStorage.getItem(key);
+    if (!id) {
+      id = "g_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
+      localStorage.setItem(key, id);
+    }
+    return id;
+  }
 
-        return { podId, from, aud };
-      }
+  // ---- State
+  const podId = getPodIdFromUrl();
+  const fromUserId = qs("from") || "";
+  const aud = normalizeAud(qs("aud") || "");
+  const guestId = getOrCreateGuestId();
 
-      function audLabel(aud) {
-        if (aud === "friends") return "Friends Pod";
-        if (aud === "twins") return "Style Twins";
-        if (aud === "global") return "Global Mix";
-        return "Pod";
-      }
+  const elTitle = document.getElementById("title");
+  const elMeta = document.getElementById("meta");
+  const elImg = document.getElementById("podImg");
+  const elImgPh = document.getElementById("imgPlaceholder");
+  const elErr = document.getElementById("err");
+  const elStatus = document.getElementById("status");
+  const elNameField = document.getElementById("nameField");
+  const elCommentField = document.getElementById("commentField");
+  const elGuestName = document.getElementById("guestName");
+  const elGuestComment = document.getElementById("guestComment");
 
-      function setLiveBadge(isLive, ends_at) {
-        const el = $("liveBadge");
-        if (!ends_at) {
-          el.textContent = "Live";
-          return;
-        }
-        if (!isLive) {
-          el.textContent = "Ended";
-          el.style.borderColor = "rgba(255,107,107,.35)";
-          el.style.background = "rgba(255,107,107,.10)";
-          return;
-        }
-        // countdown (simple)
-        const end = new Date(ends_at).getTime();
-        const now = Date.now();
-        const ms = Math.max(0, end - now);
-        const mins = Math.floor(ms / 60000);
-        const hrs = Math.floor(mins / 60);
-        const mm = mins % 60;
-        el.textContent = hrs > 0 ? `${hrs}h ${mm}m left` : `${mm}m left`;
-      }
+  const btnYes = document.getElementById("btnYes");
+  const btnMaybe = document.getElementById("btnMaybe");
+  const btnNo = document.getElementById("btnNo");
+  const downloadBtn = document.getElementById("downloadBtn");
 
-      function normalizeImages(image_url) {
-        if (!image_url) return [];
-        if (Array.isArray(image_url)) return image_url.filter(Boolean);
+  function setError(msg) { elErr.textContent = msg || ""; }
+  function setStatus(msg, ok=false) {
+    elStatus.textContent = msg || "";
+    elStatus.className = ok ? "status ok" : "status";
+  }
+  function setLoadingButtons(loading) {
+    [btnYes, btnMaybe, btnNo].forEach(b => b.disabled = !!loading);
+  }
 
-        if (typeof image_url === "string") {
-          const s = image_url.trim();
-          // sometimes stored as JSON array string
-          if (s.startsWith("[")) {
-            try {
-              const parsed = JSON.parse(s);
-              if (Array.isArray(parsed)) return parsed.filter(Boolean);
-            } catch {}
-          }
-          return [s];
-        }
-        return [];
-      }
+  async function fetchPod() {
+    if (!podId) {
+      setError("Missing podId in URL.");
+      elTitle.textContent = "Could not load pod.";
+      elMeta.textContent = "Invalid link.";
+      return null;
+    }
 
-      function renderImages(images) {
-        const box = $("imgBox");
-        box.innerHTML = ""; // clear
+    const url = `${API_BASE}/api/pod-public?podId=${encodeURIComponent(podId)}`;
+    console.log("Fetching pod from:", url);
 
-        if (!images.length) {
-          box.innerHTML = `<div style="padding:18px; color: rgba(255,255,255,.7)">No image found.</div>`;
-          return;
-        }
+    let res;
+    try {
+      res = await fetch(url, { cache: "no-store" });
+    } catch (e) {
+      setError("Network error loading pod.");
+      return null;
+    }
 
-        let idx = 0;
-        const img = document.createElement("img");
-        img.src = images[0];
-        img.alt = "Pod image";
-        box.appendChild(img);
+    const text = await res.text();
+    console.log("pod-public status:", res.status, "body:", text);
 
-        const dots = $("dots");
-        dots.classList.toggle("hidden", images.length <= 1);
-        dots.innerHTML = "";
-        if (images.length > 1) {
-          for (let i = 0; i < images.length; i++) {
-            const d = document.createElement("div");
-            d.className = "dot" + (i === 0 ? " active" : "");
-            d.addEventListener("click", () => {
-              idx = i;
-              img.src = images[idx];
-              [...dots.children].forEach((c, j) => c.classList.toggle("active", j === idx));
-            });
-            dots.appendChild(d);
-          }
-          box.appendChild(dots);
-        }
-      }
+    if (!res.ok) {
+      setError("Could not load pod.\n\n" + text);
+      return null;
+    }
 
-      function setError(msg) {
-        const e = $("errMsg");
-        e.textContent = msg;
-        e.classList.remove("hidden");
-        $("okMsg").classList.add("hidden");
-      }
+    try { return JSON.parse(text); }
+    catch { setError("Bad JSON from API."); return null; }
+  }
 
-      function setOk(msg) {
-        const ok = $("okMsg");
-        ok.textContent = msg;
-        ok.classList.remove("hidden");
-        $("errMsg").classList.add("hidden");
-      }
+  function applyPod(pod) {
+    elTitle.textContent = pod.title || "What do you think?";
+    const ends = pod.ends_at ? new Date(pod.ends_at) : null;
+    const live = !!pod.isLive;
+    const audience = pod.audience || aud || "";
 
-      // -------- main ----------
-      (async function init() {
-        const { podId, from, aud } = parseUrl();
+    elMeta.textContent =
+      `Audience: ${audience} • Status: ${live ? "Live" : (pod.status || "unknown")} • Ends: ${ends ? ends.toLocaleString() : "—"}`;
 
-        $("audBadge").textContent = audLabel(aud);
+    // show comment field only for friends
+    const isFriends = (aud === "friends") || (pod.audience === "friends");
+    elCommentField.style.display = isFriends ? "block" : "none";
+    elNameField.querySelector("span")?.remove;
+    // keep name input visible always, but required only for friends
+    if (isFriends) {
+      elNameField.querySelector("label").innerHTML = 'Your name <span style="opacity:.6">(required)</span>';
+    } else {
+      elNameField.querySelector("label").innerHTML = 'Your name <span style="opacity:.6">(optional)</span>';
+    }
 
-        // download button should preserve "from"
-        const dl = new URL("/download.html", window.location.origin);
-        if (from) dl.searchParams.set("from", from);
-        $("downloadBtn").href = dl.toString();
+    if (pod.image_url) {
+      elImg.src = pod.image_url;
+      elImg.onload = () => { elImg.style.display = "block"; elImgPh.style.display = "none"; };
+      elImg.onerror = () => { elImgPh.textContent = "Could not load image."; };
+    } else {
+      elImgPh.textContent = "No image.";
+    }
 
-        // friends rules: name required + comment enabled
-        const isFriends = aud === "friends";
-        $("nameReq").textContent = isFriends ? "(required)" : "(optional)";
-        $("commentField").classList.toggle("hidden", !isFriends);
+    // Download button keeps ref so you can track
+    const dl = `download.html${fromUserId ? `?from=${encodeURIComponent(fromUserId)}` : ""}`;
+    downloadBtn.href = dl;
 
-        if (!podId) {
-          setError("Missing pod id in URL.\nExpected: /pod/<podId>?aud=friends|twins|global");
-          $("liveBadge").textContent = "Error";
-          return;
-        }
+    if (!live) {
+      setStatus("This pod has ended.", false);
+      setLoadingButtons(true);
+    } else {
+      setStatus("", false);
+    }
+  }
 
-        try {
-          const res = await fetch(`${API_BASE}/api/pod-public?podId=${encodeURIComponent(podId)}`, {
-            method: "GET",
-            headers: { "Accept": "application/json" },
-          });
-          if (!res.ok) throw new Error(`pod-public failed (${res.status})`);
-          const pod = await res.json();
+  async function submitVote(choice) {
+    setError("");
+    setStatus("Submitting vote…");
+    setLoadingButtons(true);
 
-          $("title").textContent = pod.title || "What do you think?";
-          $("subtitle").textContent = "Vote fast — help them decide.";
-          setLiveBadge(!!pod.isLive, pod.ends_at);
+    const name = (elGuestName.value || "").trim();
+    const comment = (elGuestComment.value || "").trim();
 
-          const imgs = normalizeImages(pod.image_url);
-          renderImages(imgs);
+    // friends requires name
+    const isFriends = (aud === "friends");
+    if (isFriends && !name) {
+      setError("Please enter your name to vote on a friends pod.");
+      setLoadingButtons(false);
+      setStatus("");
+      return;
+    }
 
-          // If ended, disable voting
-          if (!pod.isLive) {
-            document.querySelectorAll(".voteBtn").forEach(btn => {
-              btn.style.opacity = "0.45";
-              btn.style.pointerEvents = "none";
-            });
-            $("subtitle").textContent = "This pod already ended.";
-          }
-        } catch (err) {
-          setError("Could not load pod.\n\n" + (err?.message || String(err)));
-          $("liveBadge").textContent = "Error";
-          return;
-        }
+    const payload = {
+      podId,
+      choice,                 // 'yes' | 'maybe' | 'no'
+      guest_id: guestId,
+      guest_name: name || null,
+      guest_comment: (isFriends ? (comment || null) : null),
+      from_user_id: fromUserId || null,
+      aud: aud || null
+    };
 
-        // voting handler
-        document.querySelectorAll(".voteBtn").forEach(btn => {
-          btn.addEventListener("click", async () => {
-            $("errMsg").classList.add("hidden");
+    const url = `${API_BASE}/api/pod-guest-vote`;
+    console.log("Posting vote to:", url, payload);
 
-            const choice = btn.getAttribute("data-choice");
-            const guest_id = getGuestId();
-            const guest_name = ($("guestName").value || "").trim();
-            const guest_comment = ($("guestComment").value || "").trim();
+    let res;
+    try {
+      res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (e) {
+      setError("Network error submitting vote.");
+      setLoadingButtons(false);
+      setStatus("");
+      return;
+    }
 
-            const { podId, from, aud } = parseUrl();
-            const isFriends = aud === "friends";
+    const text = await res.text();
+    console.log("pod-guest-vote status:", res.status, "body:", text);
 
-            if (isFriends && !guest_name) {
-              setError("Please enter your name to vote on a Friends pod.");
-              $("guestName").focus();
-              return;
-            }
+    if (!res.ok) {
+      setError("Vote failed.\n\n" + text);
+      setLoadingButtons(false);
+      setStatus("");
+      return;
+    }
 
-            // prevent double click spam
-            document.querySelectorAll(".voteBtn").forEach(b => b.style.pointerEvents = "none");
+    setStatus("✅ Vote submitted! Redirecting…", true);
 
-            try {
-              const payload = {
-                podId,
-                choice,
-                guest_id,
-                guest_name: guest_name || undefined,
-                guest_comment: isFriends ? (guest_comment || undefined) : undefined,
-                from_user_id: from || undefined,
-                aud: aud || undefined,
-              };
+    // After vote: send to download page (with tracking params)
+    const next = `download.html?from=${encodeURIComponent(fromUserId || "")}&podId=${encodeURIComponent(podId)}&aud=${encodeURIComponent(aud || "")}&voted=1`;
+    setTimeout(() => { window.location.href = next; }, 900);
+  }
 
-              const res = await fetch(`${API_BASE}/api/pod-guest-vote`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "Accept": "application/json" },
-                body: JSON.stringify(payload),
-              });
+  // Wire buttons
+  btnYes.onclick = () => submitVote("yes");
+  btnMaybe.onclick = () => submitVote("maybe");
+  btnNo.onclick = () => submitVote("no");
 
-              const json = await res.json().catch(() => ({}));
-              if (!res.ok) {
-                throw new Error(json?.error || `guest vote failed (${res.status})`);
-              }
-
-              setOk("✅ Vote submitted. Thanks!");
-
-              // Optional: after vote, nudge install
-              setTimeout(() => {
-                window.location.href = $("downloadBtn").href;
-              }, 900);
-            } catch (err) {
-              setError("Vote failed. Please try again.\n\n" + (err?.message || String(err)));
-              document.querySelectorAll(".voteBtn").forEach(b => b.style.pointerEvents = "auto");
-            }
-          });
-        });
-      })();
-    </script>
-  </body>
+  // Init
+  (async function init() {
+    const pod = await fetchPod();
+    if (!pod) {
+      elTitle.textContent = "Could not load pod.";
+      elMeta.textContent = "Load failed.";
+      setLoadingButtons(true);
+      return;
+    }
+    applyPod(pod);
+  })();
+</script>
+</body>
 </html>
