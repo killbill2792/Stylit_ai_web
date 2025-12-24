@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stylit — Download</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      :root { color-scheme: dark; }
+      body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background:#0B0B0F; color:#fff; }
+      .wrap { max-width: 520px; margin: 0 auto; padding: 22px; }
+      .card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.10); border-radius: 18px; padding: 18px; }
+      h1 { margin:0 0 8px; font-size: 34px; letter-spacing: -.6px; }
+      p { margin: 0 0 14px; color: rgba(255,255,255,.76); line-height: 1.45; }
+      .btnRow { display:flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+      .btn { display:inline-flex; align-items:center; justify-content:center; padding: 12px 14px; border-radius: 14px; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06); text-decoration:none; color:#fff; }
+      .btnPrimary { background:#fff; color:#000; border-color:#fff; font-weight: 800; }
+      .tiny { font-size: 12px; color: rgba(255,255,255,.6); margin-top: 12px; }
+      code { background: rgba(255,255,255,.08); padding: 3px 6px; border-radius: 8px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1>Get Stylit</h1>
+        <p>
+          Stylit helps you try fits and get fast votes (Friends, Style Twins, Global Mix) so you can decide with confidence.
+        </p>
+
+        <div class="btnRow">
+          <!-- Replace this later with your real App Store link -->
+          <a class="btn btnPrimary" id="appStoreBtn" href="#" target="_blank" rel="noreferrer">
+            Download on App Store
+          </a>
+
+          <a class="btn" href="/support.html" target="_blank" rel="noreferrer">Support</a>
+        </div>
+
+        <p class="tiny">
+          If you don’t have the App Store link yet, this page still works. Once your app is live, update
+          <code>appStoreBtn.href</code> below.
+        </p>
+      </div>
+    </div>
+
+    <script>
+      // OPTIONAL: set your App Store URL once you have it
+      const APP_STORE_URL = ""; // e.g. "https://apps.apple.com/app/idXXXXXXXXX"
+
+      const btn = document.getElementById("appStoreBtn");
+      if (APP_STORE_URL) {
+        btn.href = APP_STORE_URL;
+      } else {
+        btn.href = "mailto:support@stylit.ai?subject=Stylit%20Download%20Link";
+        btn.textContent = "Email me for the download";
+      }
+
+      // If you want to track "from" param later, you can read it here:
+      // const from = new URL(window.location.href).searchParams.get("from");
+    </script>
+  </body>
+</html>
