@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stylit — Pod Vote</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      /* Fallback styling if styles.css is minimal */
+      :root { color-scheme: dark; }
+      body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background:#0B0B0F; color:#fff; }
+      a { color: inherit; }
+      .wrap { max-width: 520px; margin: 0 auto; padding: 18px; }
+      .card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.10); border-radius: 18px; overflow:hidden; }
+      .topbar { display:flex; align-items:center; justify-content:space-between; gap: 10px; margin-bottom: 12px; }
+      .badge { font-size: 12px; padding: 6px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); }
+      .imgbox { width: 100%; aspect-ratio: 9/16; background: rgba(255,255,255,.04); position: relative; }
+      .imgbox img { width: 100%; height: 100%; object-fit: cover; display:block; }
+      .imgdots { position:absolute; left:0; right:0; bottom: 10px; display:flex; justify-content:center; gap: 8px; }
+      .dot { width: 7px; height: 7px; border-radius: 999px; background: rgba(255,255,255,.25); }
+      .dot.active { background: rgba(255,255,255,.9); }
+      .content { padding: 14px; }
+      .title { font-size: 18px; font-weight: 800; letter-spacing:-.2px; margin: 0 0 8px; }
+      .sub { color: rgba(255,255,255,.75); font-size: 13px; line-height: 1.35; margin: 0 0 12px; }
+      .field { display:flex; flex-direction:column; gap:6px; margin-top: 10px; }
+      label { font-size: 12px; color: rgba(255,255,255,.7); }
+      input, textarea {
+        border-radius: 14px; border:1px solid rgba(255,255,255,.12);
+        background: rgba(255,255,255,.06); color: #fff; padding: 12px;
+        outline: none;
+      }
+      textarea { resize: vertical; min-height: 92px; }
+      .row { display:flex; gap: 10px; }
+      .row > * { flex: 1; }
+      .votes { display:flex; gap: 12px; justify-content:space-between; margin-top: 14px; }
+      .voteBtn {
+        flex: 1;
+        border-radius: 16px;
+        border: 1px solid rgba(255,255,255,.12);
+        background: rgba(255,255,255,.06);
+        padding: 12px 10px;
+        cursor: pointer;
+        display:flex; align-items:center; justify-content:center; gap:10px;
+        transition: transform .08s ease, background .15s ease, border-color .15s ease;
+        user-select:none;
+      }
+      .voteBtn:hover { transform: translateY(-1px); border-color: rgba(255,255,255,.22); }
+      .emoji { font-size: 24px; }
+      .btn {
+        display:inline-flex; align-items:center; justify-content:center;
+        gap: 10px; padding: 12px 14px; border-radius: 14px;
+        border: 1px solid rgba(255,255,255,.12);
+        background: rgba(255,255,255,.06); cursor:pointer; text-decoration:none;
+      }
+      .btnPrimary { background: #fff; color:#000; border-color:#fff; font-weight:800; }
+      .note { margin-top: 10px; font-size: 12px; color: rgba(255,255,255,.65); }
+      .err { margin-top: 10px; font-size: 12px; color: #ff6b6b; white-space: pre-wrap; }
+      .ok { margin-top: 10px; font-size: 13px; color: #6ee7b7; }
+      .hidden { display:none; }
+      .footer { margin-top: 14px; display:flex; justify-content:space-between; gap: 10px; align-items:center; flex-wrap:wrap; }
+      .muted { color: rgba(255,255,255,.55); font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <div class="badge" id="audBadge">Pod</div>
+        <div class="badge" id="liveBadge">Loading…</div>
+      </div>
+
+      <div class="card">
+        <div class="imgbox" id="imgBox">
+          <!-- image injected -->
+          <div class="imgdots hidden" id="dots"></div>
+        </div>
+
+        <div class="content">
+          <h1 class="title" id="title">Loading pod…</h1>
+          <p class="sub" id="subtitle">Fetching details.</p>
+
+          <div class="field" id="nameField">
+            <label for="guestName">Your name <span id="nameReq">(required)</span></label>
+            <input id="guestName" type="text" placeholder="e.g., Alex" autocomplete="name" />
+          </div>
+
+          <div class="field hidden" id="commentField">
+            <label for="guestComment">Comment (only the pod owner will see this)</label>
+            <textarea id="guestComment" placeholder="Quick thoughts…"></textarea>
+          </div>
+
+          <div class="votes" id="votes">
+            <div class="voteBtn" data-choice="yes" title="Yes">
+              <span class="emoji">🔥</span>
+              <span>Fire</span>
+            </div>
+            <div class="voteBtn" data-choice="maybe" title="Maybe">
+              <span class="emoji">🤔</span>
+              <span>Maybe</span>
+            </div>
+            <div class="voteBtn" data-choice="no" title="No">
+              <span class="emoji">❌</span>
+              <span>No</span>
+            </div>
+          </div>
+
+          <div class="ok hidden" id="okMsg">✅ Vote submitted. Thanks!</div>
+          <div class="err hidden" id="errMsg"></div>
+
+          <div class="footer">
+            <a class="btn btnPrimary" id="downloadBtn" href="/download.html">Download Stylit</a>
+            <span class="muted" id="fineprint">Powered by Stylit Pods</span>
+          </div>
+
+          <div class="note" id="note">
+            Tip: This is a quick vote page. If you install Stylit, you’ll see recaps + results.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // IMPORTANT: replace with your Vercel domain that hosts /api/pod-public and /api/pod-guest-vote
+      const API_BASE = "https://mvp-styli.vercel.app/";
+
+      // -------- helpers ----------
+      function $(id) { return document.getElementById(id); }
+
+      function getGuestId() {
+        const key = "stylit_guest_id";
+        let id = localStorage.getItem(key);
+        if (!id) {
+          id = "guest_" + Math.random().toString(36).slice(2) + "_" + Date.now();
+          localStorage.setItem(key, id);
+        }
+        return id;
+      }
+
+      function parseUrl() {
+        const u = new URL(window.location.href);
+
+        // Supports both:
+        // 1) /pod/<podId>?from=...&aud=...
+        // 2) /pod.html?podId=<podId>&from=...&aud=...
+        let podId = u.searchParams.get("podId");
+        if (!podId) {
+          const parts = u.pathname.split("/").filter(Boolean);
+          // e.g. ["pod","<id>"]
+          const podIdx = parts.indexOf("pod");
+          if (podIdx !== -1 && parts[podIdx + 1]) podId = parts[podIdx + 1];
+        }
+
+        const from = u.searchParams.get("from") || "";
+        const aud = (u.searchParams.get("aud") || "").toLowerCase();
+
+        return { podId, from, aud };
+      }
+
+      function audLabel(aud) {
+        if (aud === "friends") return "Friends Pod";
+        if (aud === "twins") return "Style Twins";
+        if (aud === "global") return "Global Mix";
+        return "Pod";
+      }
+
+      function setLiveBadge(isLive, ends_at) {
+        const el = $("liveBadge");
+        if (!ends_at) {
+          el.textContent = "Live";
+          return;
+        }
+        if (!isLive) {
+          el.textContent = "Ended";
+          el.style.borderColor = "rgba(255,107,107,.35)";
+          el.style.background = "rgba(255,107,107,.10)";
+          return;
+        }
+        // countdown (simple)
+        const end = new Date(ends_at).getTime();
+        const now = Date.now();
+        const ms = Math.max(0, end - now);
+        const mins = Math.floor(ms / 60000);
+        const hrs = Math.floor(mins / 60);
+        const mm = mins % 60;
+        el.textContent = hrs > 0 ? `${hrs}h ${mm}m left` : `${mm}m left`;
+      }
+
+      function normalizeImages(image_url) {
+        if (!image_url) return [];
+        if (Array.isArray(image_url)) return image_url.filter(Boolean);
+
+        if (typeof image_url === "string") {
+          const s = image_url.trim();
+          // sometimes stored as JSON array string
+          if (s.startsWith("[")) {
+            try {
+              const parsed = JSON.parse(s);
+              if (Array.isArray(parsed)) return parsed.filter(Boolean);
+            } catch {}
+          }
+          return [s];
+        }
+        return [];
+      }
+
+      function renderImages(images) {
+        const box = $("imgBox");
+        box.innerHTML = ""; // clear
+
+        if (!images.length) {
+          box.innerHTML = `<div style="padding:18px; color: rgba(255,255,255,.7)">No image found.</div>`;
+          return;
+        }
+
+        let idx = 0;
+        const img = document.createElement("img");
+        img.src = images[0];
+        img.alt = "Pod image";
+        box.appendChild(img);
+
+        const dots = $("dots");
+        dots.classList.toggle("hidden", images.length <= 1);
+        dots.innerHTML = "";
+        if (images.length > 1) {
+          for (let i = 0; i < images.length; i++) {
+            const d = document.createElement("div");
+            d.className = "dot" + (i === 0 ? " active" : "");
+            d.addEventListener("click", () => {
+              idx = i;
+              img.src = images[idx];
+              [...dots.children].forEach((c, j) => c.classList.toggle("active", j === idx));
+            });
+            dots.appendChild(d);
+          }
+          box.appendChild(dots);
+        }
+      }
+
+      function setError(msg) {
+        const e = $("errMsg");
+        e.textContent = msg;
+        e.classList.remove("hidden");
+        $("okMsg").classList.add("hidden");
+      }
+
+      function setOk(msg) {
+        const ok = $("okMsg");
+        ok.textContent = msg;
+        ok.classList.remove("hidden");
+        $("errMsg").classList.add("hidden");
+      }
+
+      // -------- main ----------
+      (async function init() {
+        const { podId, from, aud } = parseUrl();
+
+        $("audBadge").textContent = audLabel(aud);
+
+        // download button should preserve "from"
+        const dl = new URL("/download.html", window.location.origin);
+        if (from) dl.searchParams.set("from", from);
+        $("downloadBtn").href = dl.toString();
+
+        // friends rules: name required + comment enabled
+        const isFriends = aud === "friends";
+        $("nameReq").textContent = isFriends ? "(required)" : "(optional)";
+        $("commentField").classList.toggle("hidden", !isFriends);
+
+        if (!podId) {
+          setError("Missing pod id in URL.\nExpected: /pod/<podId>?aud=friends|twins|global");
+          $("liveBadge").textContent = "Error";
+          return;
+        }
+
+        try {
+          const res = await fetch(`${API_BASE}/api/pod-public?podId=${encodeURIComponent(podId)}`, {
+            method: "GET",
+            headers: { "Accept": "application/json" },
+          });
+          if (!res.ok) throw new Error(`pod-public failed (${res.status})`);
+          const pod = await res.json();
+
+          $("title").textContent = pod.title || "What do you think?";
+          $("subtitle").textContent = "Vote fast — help them decide.";
+          setLiveBadge(!!pod.isLive, pod.ends_at);
+
+          const imgs = normalizeImages(pod.image_url);
+          renderImages(imgs);
+
+          // If ended, disable voting
+          if (!pod.isLive) {
+            document.querySelectorAll(".voteBtn").forEach(btn => {
+              btn.style.opacity = "0.45";
+              btn.style.pointerEvents = "none";
+            });
+            $("subtitle").textContent = "This pod already ended.";
+          }
+        } catch (err) {
+          setError("Could not load pod.\n\n" + (err?.message || String(err)));
+          $("liveBadge").textContent = "Error";
+          return;
+        }
+
+        // voting handler
+        document.querySelectorAll(".voteBtn").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            $("errMsg").classList.add("hidden");
+
+            const choice = btn.getAttribute("data-choice");
+            const guest_id = getGuestId();
+            const guest_name = ($("guestName").value || "").trim();
+            const guest_comment = ($("guestComment").value || "").trim();
+
+            const { podId, from, aud } = parseUrl();
+            const isFriends = aud === "friends";
+
+            if (isFriends && !guest_name) {
+              setError("Please enter your name to vote on a Friends pod.");
+              $("guestName").focus();
+              return;
+            }
+
+            // prevent double click spam
+            document.querySelectorAll(".voteBtn").forEach(b => b.style.pointerEvents = "none");
+
+            try {
+              const payload = {
+                podId,
+                choice,
+                guest_id,
+                guest_name: guest_name || undefined,
+                guest_comment: isFriends ? (guest_comment || undefined) : undefined,
+                from_user_id: from || undefined,
+                aud: aud || undefined,
+              };
+
+              const res = await fetch(`${API_BASE}/api/pod-guest-vote`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                body: JSON.stringify(payload),
+              });
+
+              const json = await res.json().catch(() => ({}));
+              if (!res.ok) {
+                throw new Error(json?.error || `guest vote failed (${res.status})`);
+              }
+
+              setOk("✅ Vote submitted. Thanks!");
+
+              // Optional: after vote, nudge install
+              setTimeout(() => {
+                window.location.href = $("downloadBtn").href;
+              }, 900);
+            } catch (err) {
+              setError("Vote failed. Please try again.\n\n" + (err?.message || String(err)));
+              document.querySelectorAll(".voteBtn").forEach(b => b.style.pointerEvents = "auto");
+            }
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>
