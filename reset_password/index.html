@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reset Password • Styleit</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background:#0b0b0f; color:#fff; display:flex; min-height:100vh; align-items:center; justify-content:center; padding:24px; }
+      .card { max-width:520px; width:100%; background:#141420; border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:20px; }
+      input { width:100%; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:#0f0f18; color:#fff; margin-top:8px; }
+      .btn { width:100%; padding:12px; border-radius:12px; border:none; background:#5c5ce6; color:#fff; font-weight:700; margin-top:12px; cursor:pointer; }
+      .muted { color:rgba(255,255,255,.7); }
+      .ok { color:#6ee7b7; font-weight:700; }
+      .bad { color:#fca5a5; font-weight:700; }
+      a { color:#9aa3ff; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2>Reset password</h2>
+      <p id="status" class="muted">Validating link…</p>
+
+      <div id="form" style="display:none;">
+        <label class="muted">New password</label>
+        <input id="pw1" type="password" placeholder="New password" />
+        <label class="muted" style="margin-top:10px; display:block;">Confirm new password</label>
+        <input id="pw2" type="password" placeholder="Confirm new password" />
+        <button id="submit" class="btn">Reset Password</button>
+      </div>
+
+      <div id="after" style="display:none; margin-top:12px;">
+        <p class="ok">Password updated.</p>
+        <a id="openApp" href="styleit://auth">Open Styleit</a>
+      </div>
+
+      <p id="detail" class="muted" style="margin-top:10px;"></p>
+    </div>
+
+    <script type="module">
+      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+      const SUPABASE_URL = "https://rlbfdnzwkgxkzsapetdt.supabase.co";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsYmZkbnp3a2d4a3pzYXBldGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5OTM4MDIsImV4cCI6MjA3NDU2OTgwMn0.jtbgDU65YTa8yzqFkNsa_b9a4EPVAhk4pKR7luqmPGk";
+      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      const statusEl = document.getElementById("status");
+      const detailEl = document.getElementById("detail");
+      const formEl = document.getElementById("form");
+      const afterEl = document.getElementById("after");
+      const pw1 = document.getElementById("pw1");
+      const pw2 = document.getElementById("pw2");
+      const submit = document.getElementById("submit");
+
+      // 1) Consume link + create session (from code or hash)
+      const { data, error } = await supabase.auth.getSessionFromUrl({ storeSession: true });
+
+      if (error) {
+        statusEl.innerHTML = `<span class="bad">Invalid or expired link.</span>`;
+        detailEl.textContent = error.message;
+      } else {
+        statusEl.innerHTML = `<span class="ok">Link verified.</span>`;
+        detailEl.textContent = "Choose a new password.";
+        formEl.style.display = "block";
+      }
+
+      // 2) Update password
+      submit.addEventListener("click", async () => {
+        detailEl.textContent = "";
+        const a = pw1.value.trim();
+        const b = pw2.value.trim();
+
+        if (!a || a.length < 8) {
+          detailEl.innerHTML = `<span class="bad">Use at least 8 characters.</span>`;
+          return;
+        }
+        if (a !== b) {
+          detailEl.innerHTML = `<span class="bad">Passwords don’t match.</span>`;
+          return;
+        }
+
+        submit.disabled = true;
+        submit.textContent = "Updating…";
+
+        const { error: upErr } = await supabase.auth.updateUser({ password: a });
+
+        submit.disabled = false;
+        submit.textContent = "Reset Password";
+
+        if (upErr) {
+          detailEl.innerHTML = `<span class="bad">${upErr.message}</span>`;
+          return;
+        }
+
+        formEl.style.display = "none";
+        afterEl.style.display = "block";
+        statusEl.innerHTML = `<span class="ok">Done.</span>`;
+      });
+    </script>
+  </body>
+</html>
