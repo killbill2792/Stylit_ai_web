@@ -2,166 +2,114 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Reset Password · Stylit</title>
+  <title>Reset Password • Stylit</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, Helvetica, Arial, sans-serif;
-    }
-
     body {
       margin: 0;
-      min-height: 100vh;
       background: #000;
       color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
       display: flex;
-      align-items: center;
       justify-content: center;
-      padding: 24px;
+      align-items: center;
+      height: 100vh;
     }
 
     .container {
       width: 100%;
-      max-width: 380px;
+      max-width: 360px;
+      padding: 24px;
       text-align: center;
     }
 
     h1 {
-      font-size: 36px;
       margin-bottom: 8px;
-      font-weight: 700;
+      font-size: 28px;
     }
 
     p {
       color: #9ca3af;
-      font-size: 14px;
       margin-bottom: 24px;
     }
 
     input {
       width: 100%;
-      padding: 14px 16px;
+      padding: 14px;
       margin-bottom: 12px;
-      border-radius: 14px;
+      border-radius: 12px;
       border: none;
       background: #111;
       color: #fff;
       font-size: 16px;
     }
 
-    input::placeholder {
-      color: #6b7280;
-    }
-
     button {
       width: 100%;
       padding: 14px;
-      border-radius: 16px;
+      border-radius: 14px;
       border: none;
+      background: #6d6df6;
+      color: #fff;
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
     }
 
-    .primary {
-      background: #6C6CFF;
-      color: #fff;
-      margin-top: 8px;
-    }
-
-    .primary:disabled {
-      opacity: 0.6;
-    }
-
-    .success {
-      color: #22c55e;
+    .message {
       margin-top: 16px;
       font-size: 14px;
-    }
-
-    .error {
-      color: #ef4444;
-      margin-top: 16px;
-      font-size: 14px;
-    }
-
-    .open-app {
-      margin-top: 24px;
-      background: #1f2937;
-      color: #fff;
     }
   </style>
 </head>
-<body>
 
+<body>
   <div class="container">
-    <h1>Stylit</h1>
-    <p>Reset your password</p>
+    <h1>Reset Password</h1>
+    <p>Enter a new password to continue</p>
 
     <input id="password" type="password" placeholder="New password" />
     <input id="confirm" type="password" placeholder="Confirm new password" />
 
-    <button class="primary" onclick="resetPassword()">Reset Password</button>
+    <button onclick="resetPassword()">Reset Password</button>
 
-    <div id="message"></div>
-
-    <button
-      id="openAppBtn"
-      class="open-app"
-      style="display:none"
-      onclick="openApp()"
-    >
-      Open Stylit App
-    </button>
+    <div id="message" class="message"></div>
   </div>
 
   <script>
-    const SUPABASE_URL = "https://rlbfdnzwkgxkzsapetdt.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsYmZkbnp3a2d4a3pzYXBldGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5OTM4MDIsImV4cCI6MjA3NDU2OTgwMn0.jtbgDU65YTa8yzqFkNsa_b9a4EPVAhk4pKR7luqmPGk";
-
-    const supabase = supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_ANON_KEY
-    );
+    const supabase = window.supabase.createClient(
+      "https://rlbfdnzwkgxkzsapetdt.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsYmZkbnp3a2d4a3pzYXBldGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5OTM4MDIsImV4cCI6MjA3NDU2OTgwMn0.jtbgDU65YTa8yzqFkNsa_b9a4EPVAhk4pKR7luqmPGk"
+    )
 
     async function resetPassword() {
-      const password = document.getElementById("password").value;
-      const confirm = document.getElementById("confirm").value;
-      const message = document.getElementById("message");
-
-      message.innerHTML = "";
+      const password = document.getElementById("password").value
+      const confirm = document.getElementById("confirm").value
+      const message = document.getElementById("message")
 
       if (!password || password.length < 6) {
-        message.innerHTML = "<div class='error'>Password must be at least 6 characters.</div>";
-        return;
+        message.textContent = "Password must be at least 6 characters."
+        return
       }
 
       if (password !== confirm) {
-        message.innerHTML = "<div class='error'>Passwords do not match.</div>";
-        return;
+        message.textContent = "Passwords do not match."
+        return
       }
 
       const { error } = await supabase.auth.updateUser({
-        password: password
-      });
+        password: password,
+      })
 
       if (error) {
-        message.innerHTML = `<div class='error'>${error.message}</div>`;
+        message.textContent = error.message
       } else {
-        message.innerHTML = "<div class='success'>Password updated successfully.</div>";
-        document.getElementById("openAppBtn").style.display = "block";
+        message.textContent = "Password reset successfully. You can open the app."
       }
     }
-
-    function openApp() {
-      window.location.href = "stylit://";
-    }
   </script>
-
 </body>
 </html>
