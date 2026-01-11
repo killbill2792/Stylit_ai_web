@@ -1,141 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Confirm Email - Stylit</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .container {
-      background: white;
-      border-radius: 20px;
-      padding: 40px;
-      max-width: 400px;
-      width: 100%;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      text-align: center;
-    }
-    .icon {
-      font-size: 64px;
-      margin-bottom: 20px;
-    }
-    h1 {
-      color: #1a1a1a;
-      margin-bottom: 10px;
-      font-size: 28px;
-    }
-    .subtitle {
-      color: #666;
-      margin-bottom: 30px;
-      font-size: 14px;
-    }
-    .loading {
-      color: #666;
-      margin: 20px 0;
-    }
-    .error {
-      color: #ef4444;
-      font-size: 14px;
-      margin-top: 10px;
-    }
-    .success {
-      color: #10b981;
-      font-size: 16px;
-      margin: 20px 0;
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 20px;
-      transition: transform 0.2s;
-    }
-    button:hover {
-      transform: translateY(-2px);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Email - Stylit</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .message {
+            font-size: 18px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #6366f1;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .error-title {
+            color: #ef4444;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .error-message {
+            color: #fca5a5;
+            font-size: 14px;
+        }
+        .success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+        .success-message {
+            color: #86efac;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .open-app-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .open-app-btn:hover {
+            opacity: 0.9;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div id="loading" class="loading">
-      <div class="icon">⏳</div>
-      <h1>Verifying Email...</h1>
-      <p class="subtitle">Please wait while we confirm your email address</p>
+    <div class="container">
+        <div class="logo">Stylit</div>
+        <div id="content">
+            <div class="message">Confirming your email...</div>
+            <div class="spinner"></div>
+        </div>
     </div>
-    
-    <div id="success" style="display: none;">
-      <div class="icon">✓</div>
-      <h1>Email Confirmed!</h1>
-      <p class="success">Your email has been successfully verified.</p>
-      <p class="subtitle" style="margin-top: 20px;">Redirecting to app...</p>
-    </div>
-    
-    <div id="error" style="display: none;">
-      <div class="icon">✕</div>
-      <h1>Verification Failed</h1>
-      <p class="error" id="errorMessage"></p>
-      <button onclick="window.location = 'stylit://auth'">Open App</button>
-    </div>
-  </div>
 
-  <script>
-    // Get hash fragment from URL
-    const hash = window.location.hash.substring(1);
-    const params = new URLSearchParams(hash);
-    const accessToken = params.get('access_token');
-    const refreshToken = params.get('refresh_token');
-    const type = params.get('type');
-    const error = params.get('error');
-    const errorDescription = params.get('error_description');
-    
-    // Check for errors first
-    if (error) {
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('error').style.display = 'block';
-      document.getElementById('errorMessage').textContent = 
-        errorDescription || error || 'Email verification failed. The link may have expired.';
-      return;
-    }
-    
-    // Check if we have valid tokens
-    if (!accessToken || type !== 'signup') {
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('error').style.display = 'block';
-      document.getElementById('errorMessage').textContent = 
-        'Invalid verification link. Please request a new confirmation email.';
-      return;
-    }
-    
-    // Success - redirect to app with tokens
-    // The app will handle the session setup
-    setTimeout(() => {
-      // Redirect to app with tokens in the URL
-      const redirectUrl = `stylit://confirm-email#access_token=${accessToken}&refresh_token=${refreshToken}&type=${type}`;
-      window.location = redirectUrl;
-      
-      // Fallback: show success message
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('success').style.display = 'block';
-    }, 1000);
-  </script>
+    <script>
+        // IMPORTANT: Replace these with your actual Supabase credentials
+        // You can get these from your Supabase project settings
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // e.g., 'https://xxxxx.supabase.co'
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Your anon/public key
+        
+        // Initialize Supabase client
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        (async function() {
+            const contentDiv = document.getElementById('content');
+            
+            // Check if we're on the base URL (stylit.ai) or the specific page
+            if (window.location.pathname === '/' || window.location.pathname === '') {
+                const hash = window.location.hash;
+                if (hash) {
+                    window.location.href = '/confirm_email.html' + hash;
+                    return;
+                }
+            }
+            
+            // Extract hash fragment from URL
+            const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(hash);
+            
+            const accessToken = params.get('access_token');
+            const refreshToken = params.get('refresh_token');
+            const error = params.get('error');
+            const errorDescription = params.get('error_description');
+            
+            // Handle error case
+            if (error) {
+                contentDiv.innerHTML = `
+                    <div class="message">Email confirmation failed</div>
+                    <div class="error">
+                        <div class="error-title">Error: ${error}</div>
+                        <div class="error-message">${errorDescription || 'The email link is invalid or has expired.'}</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Handle success case - automatically confirm email by setting session
+            if (accessToken && refreshToken) {
+                try {
+                    // Set the session - this automatically confirms the email
+                    const { data, error: sessionError } = await supabase.auth.setSession({
+                        access_token: accessToken,
+                        refresh_token: refreshToken,
+                    });
+                    
+                    if (sessionError) {
+                        contentDiv.innerHTML = `
+                            <div class="message">Email confirmation failed</div>
+                            <div class="error">
+                                <div class="error-title">Error</div>
+                                <div class="error-message">${sessionError.message || 'Failed to confirm email. Please try again.'}</div>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    // Success! Email is confirmed
+                    contentDiv.innerHTML = `
+                        <div class="message">Email confirmed successfully!</div>
+                        <div class="success">
+                            <div class="success-message">Your email has been verified. You can now sign in to the app.</div>
+                            <a href="stylit://" class="open-app-btn">Open App</a>
+                        </div>
+                    `;
+                } catch (err) {
+                    contentDiv.innerHTML = `
+                        <div class="message">Email confirmation failed</div>
+                        <div class="error">
+                            <div class="error-title">Error</div>
+                            <div class="error-message">${err.message || 'An unexpected error occurred.'}</div>
+                        </div>
+                    `;
+                }
+            } else {
+                // No tokens found
+                contentDiv.innerHTML = `
+                    <div class="message">Invalid confirmation link</div>
+                    <div class="error">
+                        <div class="error-message">The confirmation link is missing required information.</div>
+                    </div>
+                `;
+            }
+        })();
+    </script>
 </body>
 </html>
+
