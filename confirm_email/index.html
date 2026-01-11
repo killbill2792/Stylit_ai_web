@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Confirm Email • Styleit</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background:#0b0b0f; color:#fff; display:flex; min-height:100vh; align-items:center; justify-content:center; padding:24px; }
+      .card { max-width:520px; width:100%; background:#141420; border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:20px; }
+      .btn { display:inline-block; padding:12px 14px; border-radius:12px; background:#5c5ce6; color:#fff; text-decoration:none; font-weight:600; }
+      .muted { color:rgba(255,255,255,.7); }
+      .ok { color:#6ee7b7; font-weight:700; }
+      .bad { color:#fca5a5; font-weight:700; }
+      code { color:rgba(255,255,255,.75); }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2>Email confirmation</h2>
+      <p id="status" class="muted">Confirming…</p>
+      <p id="detail" class="muted"></p>
+      <div style="margin-top:16px;">
+        <a id="openApp" class="btn" href="#" style="display:none;">Open Styleit</a>
+      </div>
+    </div>
+
+    <script type="module">
+      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+      const SUPABASE_URL = "https://rlbfdnzwkgxkzsapetdt.supabase.co";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsYmZkbnp3a2d4a3pzYXBldGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5OTM4MDIsImV4cCI6MjA3NDU2OTgwMn0.jtbgDU65YTa8yzqFkNsa_b9a4EPVAhk4pKR7luqmPGk";
+      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      // Use your real deep link / universal link
+      const OPEN_APP_URL = "styleit://auth"; // or https://styleit.ai/open (if you use Universal Links)
+
+      const statusEl = document.getElementById("status");
+      const detailEl = document.getElementById("detail");
+      const openAppEl = document.getElementById("openApp");
+
+      try {
+        // Handles ?code=... or #access_token=... automatically
+        const { data, error } = await supabase.auth.getSessionFromUrl({ storeSession: true });
+
+        if (error) {
+          statusEl.innerHTML = `<span class="bad">Couldn’t confirm.</span>`;
+          detailEl.textContent = error.message;
+        } else {
+          statusEl.innerHTML = `<span class="ok">Email confirmed!</span>`;
+          detailEl.textContent = "You can now return to the app.";
+          openAppEl.href = OPEN_APP_URL;
+          openAppEl.style.display = "inline-block";
+        }
+      } catch (e) {
+        statusEl.innerHTML = `<span class="bad">Something went wrong.</span>`;
+        detailEl.textContent = String(e);
+      }
+    </script>
+  </body>
+</html>
