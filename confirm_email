@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirm Email - Stylit</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    .icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      color: #1a1a1a;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    .loading {
+      color: #666;
+      margin: 20px 0;
+    }
+    .error {
+      color: #ef4444;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    .success {
+      color: #10b981;
+      font-size: 16px;
+      margin: 20px 0;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="loading" class="loading">
+      <div class="icon">⏳</div>
+      <h1>Verifying Email...</h1>
+      <p class="subtitle">Please wait while we confirm your email address</p>
+    </div>
+    
+    <div id="success" style="display: none;">
+      <div class="icon">✓</div>
+      <h1>Email Confirmed!</h1>
+      <p class="success">Your email has been successfully verified.</p>
+      <p class="subtitle" style="margin-top: 20px;">Redirecting to app...</p>
+    </div>
+    
+    <div id="error" style="display: none;">
+      <div class="icon">✕</div>
+      <h1>Verification Failed</h1>
+      <p class="error" id="errorMessage"></p>
+      <button onclick="window.location = 'stylit://auth'">Open App</button>
+    </div>
+  </div>
+
+  <script>
+    // Get hash fragment from URL
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    const accessToken = params.get('access_token');
+    const refreshToken = params.get('refresh_token');
+    const type = params.get('type');
+    const error = params.get('error');
+    const errorDescription = params.get('error_description');
+    
+    // Check for errors first
+    if (error) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error').style.display = 'block';
+      document.getElementById('errorMessage').textContent = 
+        errorDescription || error || 'Email verification failed. The link may have expired.';
+      return;
+    }
+    
+    // Check if we have valid tokens
+    if (!accessToken || type !== 'signup') {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error').style.display = 'block';
+      document.getElementById('errorMessage').textContent = 
+        'Invalid verification link. Please request a new confirmation email.';
+      return;
+    }
+    
+    // Success - redirect to app with tokens
+    // The app will handle the session setup
+    setTimeout(() => {
+      // Redirect to app with tokens in the URL
+      const redirectUrl = `stylit://confirm-email#access_token=${accessToken}&refresh_token=${refreshToken}&type=${type}`;
+      window.location = redirectUrl;
+      
+      // Fallback: show success message
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('success').style.display = 'block';
+    }, 1000);
+  </script>
+</body>
+</html>
