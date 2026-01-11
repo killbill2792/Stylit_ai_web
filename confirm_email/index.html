@@ -1,60 +1,117 @@
 <!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Confirm Email • Styleit</title>
-    <style>
-      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background:#0b0b0f; color:#fff; display:flex; min-height:100vh; align-items:center; justify-content:center; padding:24px; }
-      .card { max-width:520px; width:100%; background:#141420; border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:20px; }
-      .btn { display:inline-block; padding:12px 14px; border-radius:12px; background:#5c5ce6; color:#fff; text-decoration:none; font-weight:600; }
-      .muted { color:rgba(255,255,255,.7); }
-      .ok { color:#6ee7b7; font-weight:700; }
-      .bad { color:#fca5a5; font-weight:700; }
-      code { color:rgba(255,255,255,.75); }
-    </style>
-  </head>
-  <body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Confirm Email • Stylit</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#0B0B10; --card:#12121A; --stroke:#242438;
+      --text:#F2F2F6; --muted:#A6A6B3;
+      --purple:#6D6DF6; --purple2:#9A9AFB;
+      --danger:#EF4444; --ok:#22C55E;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh; padding:22px;
+      display:flex; align-items:center; justify-content:center;
+      font-family:"Space Grotesk", system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: radial-gradient(1200px 700px at 50% -10%, rgba(109,109,246,.30), transparent 60%), var(--bg);
+      color:var(--text);
+    }
+    .wrap{width:100%; max-width:420px;}
+    .brand{font-weight:800; font-size:22px; text-align:center; margin-bottom:14px;}
+    .card{
+      background: rgba(18,18,26,.92);
+      border:1px solid var(--stroke);
+      border-radius:18px;
+      padding:18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      backdrop-filter: blur(8px);
+    }
+    h1{margin:0 0 8px 0; font-size:20px;}
+    p{margin:0 0 14px 0; color:var(--muted); font-size:13px; line-height:1.4;}
+    .status{
+      padding:10px 12px; border-radius:12px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      font-size:13px; line-height:1.35;
+      margin-bottom:12px;
+    }
+    .status.ok{border-color: rgba(34,197,94,.35); color:#CFFDE1;}
+    .status.bad{border-color: rgba(239,68,68,.35); color:#FFD1D1;}
+    .btn{
+      width:100%;
+      padding:12px 14px;
+      border-radius:12px;
+      border:none;
+      font-weight:700;
+      font-size:14px;
+      cursor:pointer;
+      background: linear-gradient(135deg, var(--purple), var(--purple2));
+      color:white;
+    }
+    .btn.secondary{
+      margin-top:10px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="brand">Stylit</div>
     <div class="card">
-      <h2>Email confirmation</h2>
-      <p id="status" class="muted">Confirming…</p>
-      <p id="detail" class="muted"></p>
-      <div style="margin-top:16px;">
-        <a id="openApp" class="btn" href="#" style="display:none;">Open Styleit</a>
-      </div>
+      <h1 id="title">Email confirmed ✅</h1>
+      <p id="sub">Your account is verified. You can now open the app.</p>
+      <div id="status" class="status ok">All set.</div>
+
+      <button id="openBtn" class="btn">Open Stylit</button>
+      <button id="homeBtn" class="btn secondary">Go to stylit.ai</button>
     </div>
+  </div>
 
-    <script type="module">
-      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+  <script>
+    const params = new URLSearchParams((location.hash || "").replace(/^#/, ""));
+    const errCode = params.get("error_code");
+    const errDesc = params.get("error_description");
 
-      const SUPABASE_URL = "https://rlbfdnzwkgxkzsapetdt.supabase.co";
-      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsYmZkbnp3a2d4a3pzYXBldGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5OTM4MDIsImV4cCI6MjA3NDU2OTgwMn0.jtbgDU65YTa8yzqFkNsa_b9a4EPVAhk4pKR7luqmPGk";
-      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const title = document.getElementById("title");
+    const sub = document.getElementById("sub");
+    const status = document.getElementById("status");
 
-      // Use your real deep link / universal link
-      const OPEN_APP_URL = "styleit://auth"; // or https://styleit.ai/open (if you use Universal Links)
+    function decodeSupabaseMsg(s){
+      if(!s) return "";
+      try { return decodeURIComponent(s.replace(/\+/g, " ")); } catch { return s; }
+    }
 
-      const statusEl = document.getElementById("status");
-      const detailEl = document.getElementById("detail");
-      const openAppEl = document.getElementById("openApp");
+    if (errCode) {
+      title.textContent = "Link expired";
+      sub.textContent = "Please go back to the app and resend the confirmation email.";
+      status.className = "status bad";
+      status.textContent = errCode === "otp_expired"
+        ? "This email link is invalid or has expired."
+        : (decodeSupabaseMsg(errDesc) || "This link is invalid.");
+    }
 
-      try {
-        // Handles ?code=... or #access_token=... automatically
-        const { data, error } = await supabase.auth.getSessionFromUrl({ storeSession: true });
+    document.getElementById("openBtn").onclick = () => {
+      // Deep link (user asked: Stylit:auth)
+      location.href = "stylit:auth";
+      // Fallback in case browser blocks deep link
+      setTimeout(() => location.href = "https://www.stylit.ai", 900);
+    };
 
-        if (error) {
-          statusEl.innerHTML = `<span class="bad">Couldn’t confirm.</span>`;
-          detailEl.textContent = error.message;
-        } else {
-          statusEl.innerHTML = `<span class="ok">Email confirmed!</span>`;
-          detailEl.textContent = "You can now return to the app.";
-          openAppEl.href = OPEN_APP_URL;
-          openAppEl.style.display = "inline-block";
-        }
-      } catch (e) {
-        statusEl.innerHTML = `<span class="bad">Something went wrong.</span>`;
-        detailEl.textContent = String(e);
-      }
-    </script>
-  </body>
+    document.getElementById("homeBtn").onclick = () => {
+      location.href = "https://www.stylit.ai";
+    };
+  </script>
+</body>
 </html>
