@@ -4,110 +4,159 @@
   <meta charset="UTF-8" />
   <title>Reset Password • Stylit</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
-    body {
-      margin: 0;
-      background: #000;
-      color: #fff;
-      font-family: -apple-system, BlinkMacSystemFont, Inter, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
+    body{
+      margin:0; background:#000; color:#fff;
+      font-family:-apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif;
+      display:flex; align-items:center; justify-content:center; min-height:100vh;
     }
-
-    .box {
-      width: 100%;
-      max-width: 360px;
-      padding: 24px;
-      text-align: center;
+    .wrap{ width:100%; max-width:380px; padding:24px; text-align:center; }
+    h1{ margin: 0 0 8px; font-size:42px; font-weight:800; letter-spacing:-0.5px; }
+    .sub{ color:#9ca3af; margin-bottom:20px; font-size:16px; }
+    .card{ background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08);
+      border-radius:18px; padding:16px; text-align:left; margin-top:14px;
     }
-
-    h1 { margin-bottom: 8px; }
-    p { color: #9ca3af; margin-bottom: 24px; }
-
-    input {
-      width: 100%;
-      padding: 14px;
-      margin-bottom: 12px;
-      border-radius: 12px;
-      border: none;
-      background: #111;
-      color: #fff;
-      font-size: 16px;
+    input{
+      width:100%; box-sizing:border-box;
+      padding:14px 14px; border-radius:14px; border:1px solid rgba(255,255,255,0.10);
+      background:rgba(255,255,255,0.06); color:#fff; font-size:16px; outline:none;
+      margin-top:10px;
     }
-
-    button {
-      width: 100%;
-      padding: 14px;
-      border-radius: 14px;
-      border: none;
-      background: #6d6df6;
-      color: #fff;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
+    button{
+      width:100%; padding:14px 14px; border-radius:14px; border:none;
+      background:#6D6DF6; color:#fff; font-size:16px; font-weight:700;
+      cursor:pointer; margin-top:14px;
     }
-
-    .msg {
-      margin-top: 14px;
-      font-size: 14px;
+    button:disabled{ opacity:0.5; cursor:not-allowed; }
+    .msg{ margin-top:12px; font-size:14px; color:#cbd5e1; min-height:18px; }
+    .err{ color:#fca5a5; }
+    .ok{ color:#86efac; }
+    .linkbtn{
+      display:inline-block; margin-top:14px; color:#6D6DF6; text-decoration:none; font-weight:700;
     }
   </style>
 </head>
 
 <body>
-  <div class="box">
-    <h1>Reset Password</h1>
-    <p>Enter your new password</p>
+  <div class="wrap">
+    <h1>Stylit</h1>
+    <div class="sub" id="subtitle">Reset your password</div>
 
-    <input id="pwd" type="password" placeholder="New password" />
-    <input id="confirm" type="password" placeholder="Confirm password" />
+    <div class="card" id="formCard">
+      <div style="font-weight:700;">New password</div>
+      <input id="pwd" type="password" placeholder="New password" autocomplete="new-password" />
+      <input id="confirm" type="password" placeholder="Confirm new password" autocomplete="new-password" />
 
-    <button onclick="resetPassword()">Reset Password</button>
+      <button id="resetBtn" onclick="resetPassword()">Reset Password</button>
+      <div id="msg" class="msg"></div>
 
-    <div id="msg" class="msg"></div>
+      <a class="linkbtn" href="stylit://auth">Open the app</a>
+    </div>
   </div>
 
   <script>
-    const supabase = window.supabase.createClient(
-      "https://rlbfdnzwkgxkzsapetdt.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsYmZkbnp3a2d4a3pzYXBldGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5OTM4MDIsImV4cCI6MjA3NDU2OTgwMn0.jtbgDU65YTa8yzqFkNsa_b9a4EPVAhk4pKR7luqmPGk"
-    )
+    const SUPABASE_URL = "https://rlbfdnzwkgxkzsapetdt.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsYmZkbnp3a2d4a3pzYXBldGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5OTM4MDIsImV4cCI6MjA3NDU2OTgwMn0.jtbgDU65YTa8yzqFkNsa_b9a4EPVAhk4pKR7luqmPGk"; // <-- replace
 
-    // 🔑 CRITICAL: finalize session from reset link
-    async function initSession() {
-      await supabase.auth.getSession()
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const subtitle = document.getElementById("subtitle");
+    const formCard = document.getElementById("formCard");
+    const msg = document.getElementById("msg");
+    const btn = document.getElementById("resetBtn");
+
+    function parseHash() {
+      const hash = window.location.hash.startsWith("#") ? window.location.hash.slice(1) : "";
+      const params = new URLSearchParams(hash);
+      return Object.fromEntries(params.entries());
     }
 
-    initSession()
+    async function init() {
+      const h = parseHash();
+
+      // 1) Handle expired/invalid links shown in your "expired url in web bar"
+      if (h.error || h.error_code) {
+        subtitle.textContent = "Link expired";
+        msg.className = "msg err";
+        msg.textContent = (h.error_code === "otp_expired")
+          ? "This reset link has expired. Please request a new password reset email."
+          : (h.error_description ? decodeURIComponent(h.error_description.replace(/\+/g, " ")) : "Reset link is invalid.");
+        btn.disabled = true;
+        return;
+      }
+
+      // 2) IMPORTANT: If tokens are in the hash (#access_token=...&refresh_token=...)
+      if (h.access_token && h.refresh_token) {
+        const { error } = await supabase.auth.setSession({
+          access_token: h.access_token,
+          refresh_token: h.refresh_token,
+        });
+
+        if (error) {
+          msg.className = "msg err";
+          msg.textContent = "Could not validate reset link. Please request a new one.";
+          btn.disabled = true;
+          return;
+        }
+
+        // Optional: clean URL (remove tokens from the address bar)
+        history.replaceState({}, document.title, window.location.pathname);
+      } else {
+        // If user opened page directly without tokens
+        msg.className = "msg err";
+        msg.textContent = "Open this page from the reset link in your email.";
+        btn.disabled = true;
+        return;
+      }
+    }
 
     async function resetPassword() {
-      const password = document.getElementById("pwd").value
-      const confirm = document.getElementById("confirm").value
-      const msg = document.getElementById("msg")
+      const password = document.getElementById("pwd").value.trim();
+      const confirm = document.getElementById("confirm").value.trim();
+
+      msg.className = "msg";
+      msg.textContent = "";
 
       if (password.length < 6) {
-        msg.textContent = "Password must be at least 6 characters."
-        return
+        msg.className = "msg err";
+        msg.textContent = "Password must be at least 6 characters.";
+        return;
       }
-
       if (password !== confirm) {
-        msg.textContent = "Passwords do not match."
-        return
+        msg.className = "msg err";
+        msg.textContent = "Passwords do not match.";
+        return;
       }
 
-      const { error } = await supabase.auth.updateUser({ password })
+      btn.disabled = true;
+      btn.textContent = "Resetting...";
+
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData?.session) {
+        msg.className = "msg err";
+        msg.textContent = "Session missing. Please open a fresh reset link from email.";
+        btn.disabled = false;
+        btn.textContent = "Reset Password";
+        return;
+      }
+
+      const { error } = await supabase.auth.updateUser({ password });
 
       if (error) {
-        msg.textContent = error.message
+        msg.className = "msg err";
+        msg.textContent = error.message;
       } else {
-        msg.textContent = "Password updated. You can open the app."
+        msg.className = "msg ok";
+        msg.textContent = "Password updated. You can open the app now.";
       }
+
+      btn.disabled = false;
+      btn.textContent = "Reset Password";
     }
+
+    init();
   </script>
 </body>
 </html>
