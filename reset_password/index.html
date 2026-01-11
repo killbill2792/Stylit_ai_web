@@ -12,29 +12,22 @@
       margin: 0;
       background: #000;
       color: #fff;
-      font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, Inter, sans-serif;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       height: 100vh;
     }
 
-    .container {
+    .box {
       width: 100%;
       max-width: 360px;
       padding: 24px;
       text-align: center;
     }
 
-    h1 {
-      margin-bottom: 8px;
-      font-size: 28px;
-    }
-
-    p {
-      color: #9ca3af;
-      margin-bottom: 24px;
-    }
+    h1 { margin-bottom: 8px; }
+    p { color: #9ca3af; margin-bottom: 24px; }
 
     input {
       width: 100%;
@@ -59,24 +52,24 @@
       cursor: pointer;
     }
 
-    .message {
-      margin-top: 16px;
+    .msg {
+      margin-top: 14px;
       font-size: 14px;
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
+  <div class="box">
     <h1>Reset Password</h1>
-    <p>Enter a new password to continue</p>
+    <p>Enter your new password</p>
 
-    <input id="password" type="password" placeholder="New password" />
-    <input id="confirm" type="password" placeholder="Confirm new password" />
+    <input id="pwd" type="password" placeholder="New password" />
+    <input id="confirm" type="password" placeholder="Confirm password" />
 
     <button onclick="resetPassword()">Reset Password</button>
 
-    <div id="message" class="message"></div>
+    <div id="msg" class="msg"></div>
   </div>
 
   <script>
@@ -85,29 +78,34 @@
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsYmZkbnp3a2d4a3pzYXBldGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5OTM4MDIsImV4cCI6MjA3NDU2OTgwMn0.jtbgDU65YTa8yzqFkNsa_b9a4EPVAhk4pKR7luqmPGk"
     )
 
-    async function resetPassword() {
-      const password = document.getElementById("password").value
-      const confirm = document.getElementById("confirm").value
-      const message = document.getElementById("message")
+    // 🔑 CRITICAL: finalize session from reset link
+    async function initSession() {
+      await supabase.auth.getSession()
+    }
 
-      if (!password || password.length < 6) {
-        message.textContent = "Password must be at least 6 characters."
+    initSession()
+
+    async function resetPassword() {
+      const password = document.getElementById("pwd").value
+      const confirm = document.getElementById("confirm").value
+      const msg = document.getElementById("msg")
+
+      if (password.length < 6) {
+        msg.textContent = "Password must be at least 6 characters."
         return
       }
 
       if (password !== confirm) {
-        message.textContent = "Passwords do not match."
+        msg.textContent = "Passwords do not match."
         return
       }
 
-      const { error } = await supabase.auth.updateUser({
-        password: password,
-      })
+      const { error } = await supabase.auth.updateUser({ password })
 
       if (error) {
-        message.textContent = error.message
+        msg.textContent = error.message
       } else {
-        message.textContent = "Password reset successfully. You can open the app."
+        msg.textContent = "Password updated. You can open the app."
       }
     }
   </script>
