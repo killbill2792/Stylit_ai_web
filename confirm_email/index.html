@@ -1,83 +1,167 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Confirm Email • Stylit</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
-
-  <style>
-    :root{
-      --bg:#0B0B10; --card:#12121A; --stroke:#242438;
-      --text:#F2F2F6; --muted:#A6A6B3;
-      --purple:#6D6DF6; --purple2:#9A9AFB;
-      --danger:#EF4444; --ok:#22C55E;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; min-height:100vh; padding:22px;
-      display:flex; align-items:center; justify-content:center;
-      font-family:"Space Grotesk", system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background: radial-gradient(1200px 700px at 50% -10%, rgba(109,109,246,.30), transparent 60%), var(--bg);
-      color:var(--text);
-    }
-    .wrap{width:100%; max-width:420px;}
-    .brand{font-weight:800; font-size:22px; text-align:center; margin-bottom:14px;}
-    .card{
-      background: rgba(18,18,26,.92);
-      border:1px solid var(--stroke);
-      border-radius:18px;
-      padding:18px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
-      backdrop-filter: blur(8px);
-    }
-    h1{margin:0 0 8px 0; font-size:20px;}
-    p{margin:0 0 14px 0; color:var(--muted); font-size:13px; line-height:1.4;}
-    .status{
-      padding:10px 12px; border-radius:12px;
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.03);
-      color: var(--muted);
-      font-size:13px; line-height:1.35;
-      margin-bottom:12px;
-    }
-    .status.ok{border-color: rgba(34,197,94,.35); color:#CFFDE1;}
-    .status.bad{border-color: rgba(239,68,68,.35); color:#FFD1D1;}
-    .btn{
-      width:100%;
-      padding:12px 14px;
-      border-radius:12px;
-      border:none;
-      font-weight:700;
-      font-size:14px;
-      cursor:pointer;
-      background: linear-gradient(135deg, var(--purple), var(--purple2));
-      color:white;
-    }
-    .btn.secondary{
-      margin-top:10px;
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.03);
-      color: var(--text);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Confirm Email • Stylit</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #000000;
+            color: #e4e4e7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .wrap {
+            width: 100%;
+            max-width: 420px;
+        }
+        .brand {
+            font-weight: 700;
+            font-size: 32px;
+            text-align: center;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .card {
+            background: rgba(18, 18, 26, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+        }
+        h1 {
+            margin: 0 0 12px 0;
+            font-size: 20px;
+            font-weight: 600;
+            color: #e4e4e7;
+        }
+        p {
+            margin: 0 0 16px 0;
+            color: #a1a1aa;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .status {
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+            color: #a1a1aa;
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 16px;
+        }
+        .status.ok {
+            border-color: rgba(99, 102, 241, 0.3);
+            background: rgba(99, 102, 241, 0.1);
+            color: #a5b4fc;
+        }
+        .status.bad {
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        .btn.primary {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: #ffffff;
+        }
+        .btn.primary:hover {
+            opacity: 0.9;
+        }
+        .btn.secondary {
+            margin-top: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: #e4e4e7;
+        }
+        .btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #6366f1;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+        .error-title {
+            color: #ef4444;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .error-message {
+            color: #fca5a5;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .success {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+        .success-message {
+            color: #a5b4fc;
+            font-size: 14px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+    </style>
 </head>
-
 <body>
-  <div class="wrap">
-    <div class="brand">Stylit</div>
-    <div class="card">
-      <h1 id="title">Email confirmed ✅</h1>
-      <p id="sub">Your account is verified. You can now open the app.</p>
-      <div id="status" class="status ok">All set.</div>
-
-      <button id="openBtn" class="btn">Open Stylit</button>
-      <button id="homeBtn" class="btn secondary">Go to stylit.ai</button>
+    <div class="wrap">
+        <div class="brand">Stylit</div>
+        <div class="card">
+            <h1 id="title">Confirming your email...</h1>
+            <p id="sub">Please wait while we verify your account.</p>
+            <div id="status" class="status" style="display: none;"></div>
+            <div id="content">
+                <div class="spinner"></div>
+            </div>
+        </div>
     </div>
-  </div>
 
   <script>
     const params = new URLSearchParams((location.hash || "").replace(/^#/, ""));
