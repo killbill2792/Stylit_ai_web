@@ -104,19 +104,6 @@
         .btn.secondary:hover {
             background: rgba(255, 255, 255, 0.08);
         }
-        .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top: 3px solid #6366f1;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
         .error {
             background: rgba(239, 68, 68, 0.1);
             border: 1px solid rgba(239, 68, 68, 0.3);
@@ -151,17 +138,17 @@
     </style>
 </head>
 <body>
-    <div class="wrap">
-        <div class="brand">Stylit</div>
-        <div class="card">
-            <h1 id="title">Confirming your email...</h1>
-            <p id="sub">Please wait while we verify your account.</p>
-            <div id="status" class="status" style="display: none;"></div>
-            <div id="content">
-                <div class="spinner"></div>
-            </div>
-        </div>
+  <div class="wrap">
+    <div class="brand">Stylit</div>
+    <div class="card">
+      <h1 id="title">Email confirmed ✅</h1>
+      <p id="sub">Your account is verified. You can now open the app.</p>
+      <div id="status" class="status ok">All set.</div>
+
+      <button id="openBtn" class="btn">Open Stylit</button>
+      <button id="homeBtn" class="btn secondary">Go to stylit.ai</button>
     </div>
+  </div>
 
   <script>
     const params = new URLSearchParams((location.hash || "").replace(/^#/, ""));
