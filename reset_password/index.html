@@ -164,31 +164,43 @@
         }
     </style>
 </head>
-<body>
+  <body>
     <div class="wrap">
-        <div class="brand">
-            <div class="logo-text">Stylit</div>
-            <div>
-                <p class="title" id="title">Reset password</p>
-                <p class="subtitle" id="subtitle">Set a new password for your Stylit account</p>
-            </div>
+      <div class="brand">
+        <div class="logo-text">Stylit</div>
+        <div>
+          <p class="title">Reset password</p>
+          <p class="subtitle">Set a new password for your Stylit account</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div id="status" class="status">Validating your link…</div>
+
+        <div class="row">
+          <div>
+            <label for="pw1">New password</label>
+            <input id="pw1" type="password" placeholder="Enter a new password" autocomplete="new-password" />
+          </div>
         </div>
 
-        <div class="card">
-            <div id="status" class="status">Validating your link…</div>
-
-            <div id="content">
-                <div class="spinner"></div>
-            </div>
-
-            <div class="link" id="openAppWrap" style="display:none;">
-                <a id="openAppLink" href="stylit://">Open Stylit</a>
-            </div>
-
-            <div class="tiny">
-                If this link is expired, request a new reset email from the app.
-            </div>
+        <div class="row">
+          <div>
+            <label for="pw2">Confirm new password</label>
+            <input id="pw2" type="password" placeholder="Re-enter password" autocomplete="new-password" />
+          </div>
         </div>
+
+        <button id="resetBtn" class="btn" disabled>Reset Password</button>
+
+        <div class="link" id="openAppWrap" style="display:none;">
+          <a id="openAppLink" href="#">Open Stylit</a>
+        </div>
+
+        <div class="tiny">
+          If this link is expired, request a new reset email from the app.
+        </div>
+      </div>
     </div>
     <!-- Supabase JS v2 -->
     <script type="module">
